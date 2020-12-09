@@ -8,8 +8,8 @@ const { v4: uuidV4 } = require('uuid')
 // TLS keys
 const fs = require('fs')
 const sslKeys = {
-    key: fs.readFileSync('server.key'),
-    cert: fs.readFileSync('server.cert')
+    key: fs.readFileSync('cert/server.key'),
+    cert: fs.readFileSync('cert/server.cert')
 }
 
 // General app config
@@ -31,8 +31,8 @@ app.get('/', (req, res) => {
     res.redirect(`/${uuidV4()}`)
 })
 
-app.get('/:room', (req, res) => {
-    res.render('room', { roomId: req.params.room })
+app.get('/:roomId', (req, res) => {
+    res.render('room', { roomId: req.params.roomId })
 })
 
 // Socket connections

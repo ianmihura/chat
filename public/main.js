@@ -15,22 +15,24 @@ let dataChannel = {}
 navigator.mediaDevices.getUserMedia({
     video: true,
     audio: false
-}).then((stream) => {
-    emit('join-room', ROOM_ID, USER_ID)
-
+}).then(stream => {
     addVideoStream(myVideo, stream)
+    // Local Stream
+    stream.getTracks().forEach(track => {
+        peerConnection.addTrack(track, stream)
+    })
 
+}).catch(error => {
+    console.log(error)
+
+}).then(() => {
+    emit('join-room', ROOM_ID, USER_ID)
     // On peer connected
     onBroadcastRecieved('peer-connected', userId => {
         callData()
         setTimeout(makeCall, 2000)
     })
-
-    // Local Stream
-    stream.getTracks().forEach(track => {
-        peerConnection.addTrack(track, stream)
-    })
-});
+})
 
 async function makeCall() {
     // Recieving Answer (local)
