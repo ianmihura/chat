@@ -12,11 +12,9 @@ const sslKeys = {
     cert: fs.readFileSync('cert/server.cert')
 }
 
-// General app config
+// Server config
 const server = https.createServer(sslKeys, app)
-const io = require('socket.io')(server)
-
-app.set('view engine', 'ejs')
+app.set('view engine', 'pug')
 app.use(express.static('public'))
 app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -26,53 +24,17 @@ app.use(function (req, res, next) {
 
 // Routes
 // app.use('/', router.get('/', (req, res) => res.render('room')))
+app.get('/', (req, res) => { res.redirect(`/${uuidV4()}`) })
+app.get('/:roomId', (req, res) => { res.render('room', { roomId: req.params.roomId }) })
 
-app.get('/', (req, res) => {
-    res.redirect(`/${uuidV4()}`)
-})
-
-app.get('/:roomId', (req, res) => {
-    res.render('room', { roomId: req.params.roomId })
-})
+// API
+// const apiService = require('./server/api')
+// app.post('api/join', apiService.join)
 
 // Socket connections
-io.on('connection', socket => {
-    socket.on('join-room', (roomId, userId) => {
-        console.log(`User joining room\n Room ${roomId}\n User ${userId}`)
-        socket.join(roomId)
-        socket.to(roomId).broadcast.emit('peer-connected', userId)
-
-        socket.on('typing', (isTyping) => {
-            socket.to(roomId).broadcast.emit('peer-typing', userId, isTyping)
-        })
-
-        socket.on('message', (message) => {
-            console.log(`User ${userId} sending message ${message}`)
-            socket.to(roomId).broadcast.emit('peer-message', userId, message)
-        })
-
-        socket.on('calling', (offer) => {
-            console.log(`User ${userId} calling`, offer)
-            socket.to(roomId).broadcast.emit('peer-calling', userId, offer)
-        })
-
-        socket.on('answering', (answer) => {
-            console.log(`User ${userId} answering`, answer)
-            socket.to(roomId).broadcast.emit('peer-answering', userId, answer)
-        })
-
-        socket.on('ice-candidate', candidate => {
-            console.log(`User ${userId} sending candidate:`, candidate)
-            socket.to(roomId).broadcast.emit('peer-ice-candidate', userId, candidate)
-        })
-
-        socket.on('disconnect', () => {
-            console.log(`User leaving room\n Room ${roomId}\n User ${userId}`)
-            socket.to(roomId).broadcast.emit('peer-disconnected', userId)
-        })
-
-    })
-})
+const io = require('socket.io')(server)
+const socketService = require('./server/socket')
+io.on('connection', socketService.ioConnect)
 
 // Deploy
 server.listen(443)

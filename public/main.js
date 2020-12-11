@@ -12,27 +12,34 @@ const peerConnection = new RTCPeerConnection({
 let dataChannel = {}
 
 // Media Stream
-navigator.mediaDevices.getUserMedia({
-    video: true,
+navigator.mediaDevices.getDisplayMedia({
+    video: {
+        cursor: "always"
+    },
     audio: false
-}).then(stream => {
-    addVideoStream(myVideo, stream)
-    // Local Stream
-    stream.getTracks().forEach(track => {
-        peerConnection.addTrack(track, stream)
-    })
-
-}).catch(error => {
-    console.log(error)
-
-}).then(() => {
-    emit('join-room', ROOM_ID, USER_ID)
-    // On peer connected
-    onBroadcastRecieved('peer-connected', userId => {
-        callData()
-        setTimeout(makeCall, 2000)
-    })
 })
+    // navigator.mediaDevices.getUserMedia({
+    //     video: true,
+    //     audio: false
+    // })
+    .then(stream => {
+        addVideoStream(myVideo, stream)
+        // Local Stream
+        stream.getTracks().forEach(track => {
+            peerConnection.addTrack(track, stream)
+        })
+
+    }).catch(error => {
+        console.log(error)
+
+    }).then(() => {
+        emit('join-room', ROOM_ID, USER_ID)
+        // On peer connected
+        onBroadcastRecieved('peer-connected', userId => {
+            callData()
+            setTimeout(makeCall, 2000)
+        })
+    })
 
 async function makeCall() {
     // Recieving Answer (local)
@@ -53,7 +60,7 @@ async function makeCall() {
 
 // Open data channel (local)
 let callData = function () {
-    dataChannel = peerConnection.createDataChannel("messaging-channel", { ordered: true })
+    dataChannel = peerConnection.createDataChannel("asdf", { ordered: true })
     configureDataChannel()
 }
 
@@ -86,16 +93,17 @@ let configureDataChannel = function () {
 
     // Listen for data messages
     dataChannel.addEventListener('message', event => {
+        console.log(event)
         const data = JSON.parse(event.data)
         addMessage(data.userId, data.message)
     })
 
     // Open and Close events
     dataChannel.addEventListener('open', event => {
-        console.log(`Data channel succesfully opened`)
+        console.log(`Data channel succesfully opened`, event)
     })
     dataChannel.addEventListener('close', event => {
-        console.log(`Data channel closed`)
+        console.log(`Data channel closed`, event)
     })
 }
 
@@ -118,7 +126,7 @@ onBroadcastRecieved('peer-ice-candidate', async (userId, iceCandidate) => {
 // On success
 peerConnection.addEventListener('connectionstatechange', event => {
     if (peerConnection.connectionState === 'connected') {
-        console.log("peers connected!", event)
+        console.log("Peers connected", event)
 
         addVideoStream(document.createElement('video'), remoteStream)
     }
@@ -130,4 +138,12 @@ let sendData = function (message) {
         message: message,
         userId: USER_ID
     }))
+}
+
+let sendChunk = function () {
+    let chunkSize = Math.min(peerConnection.sctp.maxMessageSize, 262144);
+    let dataString = new Array(chunkSize).fill('X').join('');
+    console.log(`Determined chunk size: ${chunkSize}\nFinal dataString size: ${dataString.length}`);
+
+    sendData(dataString)
 }
