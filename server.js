@@ -9,6 +9,10 @@ const session = require('express-session')
 const methodOverride = require('method-override')
 // const router = express.Router()
 
+// Required files
+const { checkAuthenticated, checkNotAuthenticated } = require('./server/helper')
+const api = require('./server/api')
+
 // TLS keys
 const fs = require('fs')
 const sslKeys = {
@@ -33,7 +37,6 @@ app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 })
-const { checkAuthenticated, checkNotAuthenticated } = require('./server/helper')
 app.set('view engine', 'pug')
 app.use(express.static('public'))
 app.use(express.urlencoded({ extended: false }))
@@ -47,12 +50,13 @@ app.use(passport.initialize())
 app.use(passport.session())
 app.use(methodOverride('_method'))
 
-
 // Routes
-app.get('/', checkAuthenticated, (req, res) => { res.redirect(`/${uuidV4()}`) })
+app.get('/', checkAuthenticated, (req, res) => { res.render('index.pug') })
 app.get('/login', checkNotAuthenticated, (req, res) => { res.render('login.pug') })
 app.get('/register', checkNotAuthenticated, (req, res) => { res.render('register.pug') })
-app.get('/:roomId', checkAuthenticated, (req, res) => { res.render('room', { roomId: req.params.roomId, userId: req.user.name }) })
+app.get('/:roomId', checkAuthenticated, (req, res) => {
+    res.render('room', { roomId: req.params.roomId, userId: req.user.name, video: req.query.video })
+})
 
 // API
 app.get('/api/users', (req, res) => { res.json(Users) })
@@ -60,7 +64,6 @@ app.post('/login', checkNotAuthenticated, passport.authenticate('local', {
     successRedirect: '/',
     failureRedirect: '/login'
 }))
-
 app.post('/register', checkNotAuthenticated, async (req, res) => {
     try {
         const hashedPassword = await bcrypt.hash(req.body.password, 10)
@@ -71,15 +74,15 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
         })
         res.redirect('/login')
 
-    } catch {
+    } catch (e) {
+        console.log(e)
         res.redirect('/register')
     }
 })
-
-app.delete('/logout', (req, res) => {
-    req.logOut()
-    res.redirect('/login')
+app.post('/room', checkAuthenticated, (req, res) => {
+    res.redirect(`${req.body.room}/?video=${req.body.video}`)
 })
+app.delete('/logout', api.deleteLogout)
 
 // Socket connections
 const io = require('socket.io')(server)

@@ -1,3 +1,17 @@
+window.localStream = {}
+window.remoteStreams = {}
+window.peerConnections = {}
+
+$(document).ready(() => {
+    window.peerConnections[0] = new RTCPeerConnection({
+        'iceServers': [{
+            urls: 'stun:stun.services.mozilla.com',
+            username: "louis@mozilla.com",
+            credential: "webrtcdemo"
+        }]
+    })
+})
+
 const peers = {}
 const remoteStream = new MediaStream()
 const peerConnection = new RTCPeerConnection({
@@ -6,47 +20,57 @@ const peerConnection = new RTCPeerConnection({
         username: "louis@mozilla.com",
         credential: "webrtcdemo"
     }]
-});
+})
 
 // Data channel
 let dataChannel = {}
 
 // Media Stream
-navigator.mediaDevices.getDisplayMedia({
-    video: {
-        cursor: "always"
-    },
-    audio: false
-})
-    // navigator.mediaDevices.getUserMedia({
-    //     video: true,
-    //     audio: false
-    // })
-    .then(stream => {
-        addVideoStream(myVideo, stream)
-        // Local Stream
-        stream.getTracks().forEach(track => {
-            peerConnection.addTrack(track, stream)
-        })
-
-    }).catch(error => {
-        console.log(error)
-
-    }).then(() => {
-        emit('join-room', ROOM_ID, USER_ID)
-        // On peer connected
-        onBroadcastRecieved('peer-connected', userId => {
-            callData()
-            setTimeout(makeCall, 2000)
-        })
+let mediaDeviceCallback = function (stream) {
+    addVideoStream(myVideo, stream)
+    // Local Stream
+    stream.getTracks().forEach(track => {
+        peerConnection.addTrack(track, stream)
     })
+}
 
+let mediaDeviceFinal = function () {
+    emit('join-room', ROOM_ID, USER_ID)
+    // On peer connected
+    onBroadcastRecieved('peer-connected', userId => {
+        callData()
+        setTimeout(makeCall, 2000)
+    })
+}
+
+if (DEFAULT_VIDEO == "screen")
+    navigator.mediaDevices.getDisplayMedia({
+        video: {
+            cursor: "always"
+        },
+        audio: false
+    })
+        .then(mediaDeviceCallback)
+        .catch((e) => console.log(e))
+        .then(mediaDeviceFinal)
+
+else if (DEFAULT_VIDEO == "webcam")
+    navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: false
+    })
+        .then(mediaDeviceCallback)
+        .catch((e) => console.log(e))
+        .then(mediaDeviceFinal)
+
+else
+    mediaDeviceFinal()
+
+// Calling
 async function makeCall() {
     // Recieving Answer (local)
     onBroadcastRecieved('peer-answering', async (userId, answer) => {
         if (!answer) return false;
-
-        console.log(answer)
 
         const remoteDesc = new RTCSessionDescription(answer);
         await peerConnection.setRemoteDescription(remoteDesc);
