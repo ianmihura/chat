@@ -1,13 +1,12 @@
 doctype html
 html
-
     head
         meta(charset="UTF-8")
         meta(name="viewport" content="width=device-width, initial-scale=1.0")
         meta(http-equiv="X-UA-Compatible" content="ie=edge")
         script.
             const ROOM_ID = "#{roomId}"
-            const USER_ID = Math.floor(Math.random() * 100)
+            const USER_ID = "#{userId}"
         script(src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
             integrity="sha256-4+XzXVhsDmqanXGHaHvgh1gMQKX40OUvDEBTu8JcmNs=" crossorigin="anonymous")
         link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css")
@@ -21,7 +20,9 @@ html
 
     body
         div.ui.container
-            div#video-grid
+            div.ui.raised.very.padded.text.container.segment
+                div#video-grid
+
             div.ui.raised.very.padded.text.container.segment
                 div.ui.list#message-board
 
@@ -33,3 +34,6 @@ html
                 div.ui.toggle.checkbox
                     input#useWebRTC(type="checkbox")
                     label Message with WebRTC
+
+            form.ui.form(action="/logout?_method=DELETE" method="POST")
+                button.ui.button(type="submit") Logout

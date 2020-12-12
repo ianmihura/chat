@@ -1,0 +1,14 @@
+DOCTYPE
+    include includes/head.pug
+    body
+        div.ui.raised.very.padded.text.container.segment
+            h1 Login
+            form.ui.form(action="/login", method="post")
+                div
+                    label(for="name") Username
+                    input(type="text" id="name" name="name" required)
+                div
+                    label(for="password") Password
+                    input(type="password" id="password" name="password" required)
+                button.ui.button(type="submit") Login
+            a(href="/register") Register
