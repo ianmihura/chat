@@ -26,4 +26,5 @@ onBroadcastRecieved('peer-disconnected', userId => {
         window.dataChannels[userId].close()
 
     deleteVideoStream(userId)
+    deletePeerMessageBoard(userId)
 })

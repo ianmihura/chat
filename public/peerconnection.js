@@ -61,10 +61,13 @@ let makeCall = async function (userId) {
 
 // Calling recieved (remote)
 onBroadcastRecieved('peer-calling', async (userId, offer) => {
-    if (!offer) return false;
+    if (!offer) return false
 
     let peerConnection = newPeerConnection(userId)
     if (!peerConnection) return false
+
+    addVideoPreview(userId)
+    addPeerMessageBoard(userId)
 
     newDataChannel(userId)
 

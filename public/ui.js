@@ -19,13 +19,23 @@ let addMessage = function (userId, message) {
 }
 
 let addFile = function (userId) {
-    let a = document.createElement("a")
+    addRibbon(userId, "sent you a file", "paperclip", "a")
+}
 
-    a.classList.add("ui", "ribbon", "label")
-    a.innerText = `${userId} sent you a file`
-    // onclick
+let addPeerMessageBoard = function (userId) {
+    addRibbon(userId, "entered the room", "user", "div")
+}
 
-    document.getElementById("message-board").appendChild(a)
+let deletePeerMessageBoard = function (userId) {
+    addRibbon(userId, "left the room", "user", "div")
+}
+
+let addRibbon = function (userId, message, icon, tag) {
+    document.getElementById("message-board").innerHTML += `
+        <${tag} class="ui ribbon label" >
+            <i class="${icon} icon"></i>
+            ${userId} ${message}
+        </${tag}>`
 }
 
 let showUserTyping = function (userId, isTyping) {

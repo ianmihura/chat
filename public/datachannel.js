@@ -20,7 +20,6 @@ let configureDataChannel = function (dataChannel) {
 
     // Listen for data messages
     dataChannel.addEventListener('message', event => {
-        console.log(event)
         const data = JSON.parse(event.data)
         addMessage(data.userId, data.message)
     })

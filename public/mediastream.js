@@ -20,9 +20,11 @@ let mediaDeviceCallback = function (stream) {
 // Media stream final callback
 let mediaDeviceFinal = function () {
     emit('join-room', ROOM_ID, USER_ID)
+
     // On peer connected
     onBroadcastRecieved('peer-connected', userId => {
         addVideoPreview(userId)
+        addPeerMessageBoard(userId)
         setTimeout(() => makeCall(userId), 2000)
     })
 }
