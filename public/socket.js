@@ -18,6 +18,12 @@ onBroadcastRecieved('peer-message', (userId, message) => {
 })
 
 onBroadcastRecieved('peer-disconnected', userId => {
-    // if (peers[userId]) peers[userId].close()
     console.log(`User disconnected ${userId}`)
+
+    if (window.peerConnections[userId])
+        window.peerConnections[userId].close()
+    if (window.dataChannels[userId])
+        window.dataChannels[userId].close()
+
+    deleteVideoStream(userId)
 })

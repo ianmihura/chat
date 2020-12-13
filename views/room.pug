@@ -10,19 +10,24 @@ html(lang="en")
         script(src="/ui.js" defer)
         script(src="/socket.js" defer)
         script(src="/room.js" defer)
+        script(src="/mediastream.js" defer)
+        script(src="/peerconnection.js" defer)
+        script(src="/datachannel.js" defer)
 
     body
         div.ui.container
             div.ui.raised.very.padded.text.container.segment
+                h1 Room #{roomId}
                 div#video-grid
 
             div.ui.raised.very.padded.text.container.segment
-                div.ui.list#message-board
+                div.ui.list.segment#message-board
 
                 form.ui.form
                     label#isTyping
-                    input#your-message(type="text")
-                    button.ui.button Send Message
+                    div.ui.fluid.action.input
+                        input#your-message(type="text")
+                        button.ui.button Send Message
                 br
                 div.ui.toggle.checkbox
                     input#useWebRTC(type="checkbox" checked="checked")

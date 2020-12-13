@@ -9,6 +9,11 @@ body {
     grid-auto-rows: 300px;
 }
 
+#message-board {
+    overflow: auto;
+    height: 200px;
+}
+
 video {
     width: 100%;
     height: 100%;

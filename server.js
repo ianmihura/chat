@@ -31,6 +31,11 @@ const Users = [{
     "id": "1607816969353",
     "name": "a",
     "password": "$2b$10$QtU8KO50rMvoJA5h3n1Nlu/JOrdkNmj6IYJP7aReixsdNXknvt7Wq"
+},
+{
+    "id": "1607896802442",
+    "name": "b",
+    "password": "$2b$10$ahJDQHQd7htzbBOWAAFbzu2UKDYNIPuh/ZULPAIApS3yBimf322NW"
 }]
 
 // Server config

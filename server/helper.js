@@ -1,4 +1,3 @@
-
 module.exports = {
     checkAuthenticated: function (req, res, next) {
         if (req.isAuthenticated())

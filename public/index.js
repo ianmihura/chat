@@ -12,8 +12,9 @@ let populateVideoOptions = function (devices) {
 
     if (devices.find(d => d.kind == "videoinput"))
         addVideoOption({
-            label: "Webcam",
-            deviceId: "webcam"
+            label: `Webcam`,
+            deviceId: "webcam",
+            default: true
         })
 
     addVideoOption({
@@ -23,9 +24,10 @@ let populateVideoOptions = function (devices) {
 
     addVideoOption({
         label: "None",
-        deviceId: "none",
-        default: true
+        deviceId: "none"
     })
+
+    $('.ui.checkbox').checkbox();
 
 }
 
@@ -34,7 +36,7 @@ let addVideoOption = function (device) {
         <div class="field">
             <div class="ui radio checkbox">
                 <input type="radio" name="video" value="${device.deviceId}" 
-                    checked="${device.default ? 'checked' : ''}">
+                ${device.default ? 'checked' : ''}>
                 <label>${device.label}</label>
             </div>
         </div>`

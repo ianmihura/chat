@@ -7,9 +7,11 @@ html(lang="en")
         div.ui.container
             div.ui.raised.very.padded.text.container.segment
                 form.ui.form(action="/room", method="post")
-                    label(for="room") Room
-                    input(type="text" id="room" name="room")
-                    button.ui.button(type="submit") Join room
+                    h1 Lobby
+                    br
+                    div.ui.action.input
+                        input(type="text" id="room" name="room")
+                        button.ui.button(type="submit") Join room
 
                     //- div.ui.vertical.menu#videoOptions
                     br
@@ -18,3 +20,5 @@ html(lang="en")
                     div.ui.form
                         div.grouped.fields#videoOptions
                             label Video
+                form.ui.form(action="/logout?_method=DELETE" method="POST")
+                    button.ui.button(type="submit") Logout
