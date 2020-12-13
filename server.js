@@ -27,7 +27,11 @@ initializePassport(passport,
     id => Users.find(user => user.id === id))
 
 // Users
-const Users = []
+const Users = [{
+    "id": "1607816969353",
+    "name": "a",
+    "password": "$2b$10$QtU8KO50rMvoJA5h3n1Nlu/JOrdkNmj6IYJP7aReixsdNXknvt7Wq"
+}]
 
 // Server config
 const SESSION_SECRET = uuidV4()

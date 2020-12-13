@@ -19,9 +19,9 @@ module.exports = {
                 socket.to(roomId).broadcast.emit('peer-calling', userId, offer)
             })
 
-            socket.on('answering', (answer) => {
-                console.log(`User ${userId} answering`, answer)
-                socket.to(roomId).broadcast.emit('peer-answering', userId, answer)
+            socket.on('answering', (answer, answerUser) => {
+                console.log(`User ${userId} answering`, answer, answerUser)
+                socket.to(roomId).broadcast.emit('peer-answering', userId, answer, answerUser)
             })
 
             socket.on('ice-candidate', candidate => {
