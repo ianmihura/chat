@@ -7,7 +7,6 @@ const bcrypt = require('bcrypt')
 const passport = require('passport')
 const session = require('express-session')
 const methodOverride = require('method-override')
-// const router = express.Router()
 
 // Required files
 const { checkAuthenticated, checkNotAuthenticated } = require('./server/helper')
@@ -31,8 +30,7 @@ const Users = [{
     "id": "1607816969353",
     "name": "a",
     "password": "$2b$10$QtU8KO50rMvoJA5h3n1Nlu/JOrdkNmj6IYJP7aReixsdNXknvt7Wq"
-},
-{
+}, {
     "id": "1607896802442",
     "name": "b",
     "password": "$2b$10$ahJDQHQd7htzbBOWAAFbzu2UKDYNIPuh/ZULPAIApS3yBimf322NW"
@@ -47,7 +45,7 @@ app.use(function (req, res, next) {
     next();
 })
 app.set('view engine', 'pug')
-app.use(express.static('public'))
+app.use(express.static('static'))
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
 app.use(session({
@@ -91,9 +89,9 @@ app.post('/register', checkNotAuthenticated, async (req, res) => {
 app.post('/room', checkAuthenticated, (req, res) => {
     res.redirect(`${req.body.room}/?video=${req.body.video}`)
 })
-app.delete('/logout', api.deleteLogout)
+app.delete('/logout', checkAuthenticated, api.deleteLogout)
 
-// Socket connections
+// Web Socket
 const io = require('socket.io')(server)
 const socketService = require('./server/socket')
 io.on('connection', socketService.ioConnect)

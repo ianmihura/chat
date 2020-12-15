@@ -1,20 +1,16 @@
 const socket = io('/')
-
-let emit = function (type, ...body) {
-    socket.emit(type, ...body)
-}
+const uiController = require('./ui')
 
 let onBroadcastRecieved = function (type, callback) {
     socket.on(type, callback)
 }
 
-
 onBroadcastRecieved('peer-typing', (userId, isTyping) => {
-    showUserTyping(userId, isTyping)
+    uiController.showUserTyping(userId, isTyping)
 })
 
 onBroadcastRecieved('peer-message', (userId, message) => {
-    addMessage(userId, message)
+    uiController.addMessage(userId, message)
 })
 
 onBroadcastRecieved('peer-disconnected', userId => {
@@ -25,6 +21,15 @@ onBroadcastRecieved('peer-disconnected', userId => {
     if (window.dataChannels[userId])
         window.dataChannels[userId].close()
 
-    deleteVideoStream(userId)
-    deletePeerMessageBoard(userId)
+    uiController.deleteVideoStream(userId)
+    uiController.deletePeerMessageBoard(userId)
 })
+
+uiController.addCustomEventListener("your-message", "input", (e) => {
+    socket.emit('typing', e.target.value)
+})
+
+module.exports = {
+    emit: function (type, ...body) { socket.emit(type, ...body) },
+    onBroadcastRecieved: onBroadcastRecieved
+}

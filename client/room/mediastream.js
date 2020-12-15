@@ -1,8 +1,11 @@
+const uiController = require('./ui')
+const socketController = require('./socket')
+
 window.localStream = {}
 window.remoteStreams = {}
 
 // Creating new peerConnection
-let newMediaStreams = function (userId) {
+module.exports.newMediaStreams = function (userId) {
     window.remoteStreams[userId] = new MediaStream()
 
     if (window.localStream.id && window.peerConnections[userId])
@@ -12,25 +15,18 @@ let newMediaStreams = function (userId) {
 }
 
 // Media stream success callback
-let mediaDeviceCallback = function (stream) {
+let _mediaDeviceCallback = function (stream) {
     window.localStream = stream
-    addVideoStream(stream, USER_ID)
+    uiController.addVideoStream(stream, USER_ID)
 }
 
 // Media stream final callback
-let mediaDeviceFinal = function () {
-    emit('join-room', ROOM_ID, USER_ID)
-
-    // On peer connected
-    onBroadcastRecieved('peer-connected', userId => {
-        addVideoPreview(userId)
-        addPeerMessageBoard(userId)
-        setTimeout(() => makeCall(userId), 2000)
-    })
+let _mediaDeviceFinal = function () {
+    socketController.emit('join-room', ROOM_ID, USER_ID)
 }
 
 // Set user selected video source
-let setVideoSource = function () {
+module.exports.setVideoSource = function () {
     if (DEFAULT_VIDEO == "screen")
         navigator.mediaDevices.getDisplayMedia({
             video: {
@@ -38,18 +34,18 @@ let setVideoSource = function () {
             },
             audio: false
         })
-            .then(mediaDeviceCallback)
+            .then(_mediaDeviceCallback)
             .catch((e) => console.log(e))
-            .then(mediaDeviceFinal)
+            .then(_mediaDeviceFinal)
 
     else if (DEFAULT_VIDEO == "webcam")
         navigator.mediaDevices.getUserMedia({
             video: true,
             audio: false
         })
-            .then(mediaDeviceCallback)
+            .then(_mediaDeviceCallback)
             .catch((e) => console.log(e))
-            .then(mediaDeviceFinal)
+            .then(_mediaDeviceFinal)
 
-    else mediaDeviceFinal()
+    else _mediaDeviceFinal()
 }

@@ -4,7 +4,9 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "dserve": "nodemon server.js"
+        "build-js": "browserify --plugin tinyify client/room > static/room.js",
+        "dserve": "nodemon server.js",
+        "watch-js": "watchify client/room -o static/room.js -v"
     },
     "keywords": [],
     "author": "",
@@ -22,6 +24,9 @@
         "uuid": "^8.1.0"
     },
     "devDependencies": {
-        "nodemon": "^2.0.4"
+        "browserify": "^17.0.0",
+        "nodemon": "^2.0.4",
+        "tinyify": "^3.0.0",
+        "watchify": "^3.11.1"
     }
 }

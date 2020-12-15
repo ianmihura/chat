@@ -1,6 +1,15 @@
+const datachannelController = require('./datachannel')
+const mediastreamController = require('./mediastream')
+const uiController = require('./ui')
+const socketController = require('./socket')
+
 window.peerConnections = {}
 
-let newPeerConnection = function (userId) {
+$(document).ready(() => {
+    mediastreamController.setVideoSource()
+})
+
+let _newPeerConnection = function (userId) {
     if (window.peerConnections[userId] && window.peerConnections[userId].connectionState != "closed")
         return false
 
@@ -12,14 +21,14 @@ let newPeerConnection = function (userId) {
         }]
     })
 
-    newMediaStreams(userId)
+    mediastreamController.newMediaStreams(userId)
 
-    configurePeerConnection(userId)
+    _configurePeerConnection(userId)
 
     return window.peerConnections[userId]
 }
 
-let configurePeerConnection = function (userId) {
+let _configurePeerConnection = function (userId) {
     let peerConnection = window.peerConnections[userId]
 
     // Set Remote Stream (all)
@@ -31,55 +40,62 @@ let configurePeerConnection = function (userId) {
     // Trickling ICE candidate exchange emit (all)
     peerConnection.addEventListener('icecandidate', event => {
         if (event.candidate)
-            emit('ice-candidate', event.candidate)
+            socketController.emit('ice-candidate', event.candidate)
     })
 
     // On success (all)
     peerConnection.addEventListener('connectionstatechange', event => {
         if (peerConnection.connectionState === 'connected') {
-            deleteVideoPreview(userId)
+            uiController.deleteVideoPreview(userId)
             let remoteStream = window.remoteStreams[userId]
-            addVideoStream(remoteStream, userId)
+            uiController.addVideoStream(remoteStream, userId)
             console.log(`Connected with peer ${userId}`)
         }
     })
 }
 
-// Calling (local)
-let makeCall = async function (userId) {
+// On peer connected
+socketController.onBroadcastRecieved('peer-connected', userId => {
+    uiController.addVideoPreview(userId)
+    uiController.addPeerMessageBoard(userId)
+    setTimeout(() => _makeCall(userId), 2000)
+})
 
-    let peerConnection = newPeerConnection(userId)
+// Calling (local)
+let _makeCall = async function (userId) {
+
+    let peerConnection = _newPeerConnection(userId)
     if (!peerConnection) return false
 
-    newDataChannel(userId)
+    datachannelController.newDataChannel(userId)
 
     const offer = await peerConnection.createOffer();
     await peerConnection.setLocalDescription(offer);
 
-    emit('calling', offer)
+    socketController.emit('calling', offer)
 }
 
 // Calling recieved (remote)
-onBroadcastRecieved('peer-calling', async (userId, offer) => {
+socketController.onBroadcastRecieved('peer-calling', async (userId, offer) => {
     if (!offer) return false
 
-    let peerConnection = newPeerConnection(userId)
+    let peerConnection = _newPeerConnection(userId)
     if (!peerConnection) return false
 
-    addVideoPreview(userId)
-    addPeerMessageBoard(userId)
+    uiController.addVideoPreview(userId)
+    uiController.addPeerMessageBoard(userId)
 
-    newDataChannel(userId)
+    datachannelController.newDataChannel(userId)
 
     peerConnection.setRemoteDescription(new RTCSessionDescription(offer))
     const answer = await peerConnection.createAnswer()
     await peerConnection.setLocalDescription(answer)
 
-    emit('answering', answer, userId)
+    socketController.emit('answering', answer, userId)
 })
 
 // Recieving Answer (local)
-onBroadcastRecieved('peer-answering', async (userId, answer, answerUser) => {
+socketController.onBroadcastRecieved('peer-answering', async (userId, answer, answerUser) => {
     if (!answer) return false
     if (window.peerConnections[userId].connectionState === "connected") return false
     if (answerUser != USER_ID) return false
@@ -89,7 +105,7 @@ onBroadcastRecieved('peer-answering', async (userId, answer, answerUser) => {
 })
 
 // Trickling ICE candidate exchange answer (all)
-onBroadcastRecieved('peer-ice-candidate', async (userId, iceCandidate) => {
+socketController.onBroadcastRecieved('peer-ice-candidate', async (userId, iceCandidate) => {
     if (iceCandidate) {
         try {
             await window.peerConnections[userId].addIceCandidate(iceCandidate)

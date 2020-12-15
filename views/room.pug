@@ -7,12 +7,7 @@ html(lang="en")
             const USER_ID = "#{userId}"
             const DEFAULT_VIDEO = "#{video}"
         script(src="/socket.io/socket.io.js" defer)
-        script(src="/ui.js" defer)
-        script(src="/socket.js" defer)
         script(src="/room.js" defer)
-        script(src="/mediastream.js" defer)
-        script(src="/peerconnection.js" defer)
-        script(src="/datachannel.js" defer)
 
     body
         div.ui.container
@@ -23,7 +18,7 @@ html(lang="en")
             div.ui.raised.very.padded.text.container.segment
                 div.ui.list.segment#message-board
 
-                form.ui.form
+                form.ui.form#message-board-form
                     label#isTyping
                     div.ui.fluid.action.input
                         input#your-message(type="text")
